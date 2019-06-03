@@ -1,6 +1,6 @@
-// GMAudioDecode.cpp : ¶¨Òå¿ØÖÆÌ¨Ó¦ÓÃ³ÌĞòµÄÈë¿Úµã¡£
+// GMAudioDecode.cpp : å®šä¹‰æ§åˆ¶å°åº”ç”¨ç¨‹åºçš„å…¥å£ç‚¹ã€‚
 //
-// Õâ¸ö³ÌĞò£¬ÎÒÃÇ½«ÒôÆµÎÄ¼ş»òÊÓÆµÖĞµÄÒôÆµÁ÷½âÂëºó×ª»»³ÉPCMÔ­Ê¼²ÉÑùÊı¾İ
+// è¿™ä¸ªç¨‹åºï¼Œæˆ‘ä»¬å°†éŸ³é¢‘æ–‡ä»¶æˆ–è§†é¢‘ä¸­çš„éŸ³é¢‘æµè§£ç åè½¬æ¢æˆPCMåŸå§‹é‡‡æ ·æ•°æ®
 
 #include "stdafx.h"
 
@@ -63,8 +63,8 @@ void ShowPacketInfo(AVPacket *av_packet)
 {
 	printf("====================== Packet Information =======================");
 	printf("  Packet pos in stream : %d\n", av_packet->pos);
-	printf("  Packet pts : %d\n", av_packet->pts);
-	printf("  Packet dts : %d\n", av_packet->dts);
+	printf("  Packet pts : %d\n", av_packet->pts);                    //pts æ˜¯æ˜¾ç¤ºçš„æ—¶é—´ 
+	printf("  Packet dts : %d\n", av_packet->dts);                    //dtsæ˜¯è§£ç çš„æ—¶é—´ï¼Œ è¿™ä¸ªæ—¶é—´æ˜¯ç”¨æ¥åšåŒæ­¥
 	printf("  Packet stream index : %d\n", av_packet->stream_index);
 	printf("  Packet data len : %\n", av_packet->size);
 
@@ -98,7 +98,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		return 0;
 	}
 
-	// Íê³É³õÊ¼»¯×¢²á
+	// å®Œæˆåˆå§‹åŒ–æ³¨å†Œ
 	av_register_all();
 	avformat_network_init();
 	avcodec_register_all();
@@ -117,7 +117,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		return -1;
 	}
 
-	// ´ò¿ªÒôÆµÎÄ¼ş
+	// æ‰“å¼€éŸ³é¢‘æ–‡ä»¶
 	AVFormatContext *format_context = NULL;
 	int errCode = avformat_open_input(&format_context, T2A(audio_path), NULL, NULL);
 	if (errCode != 0)
@@ -126,13 +126,13 @@ int _tmain(int argc, _TCHAR* argv[])
 		return errCode;
 	}
 
-	// ³õ²½²éÕÒÒôÆµĞÅÏ¢
+	// åˆæ­¥æŸ¥æ‰¾éŸ³é¢‘ä¿¡æ¯
 	avformat_find_stream_info(format_context, NULL);
 
-	// ÏÔÊ¾¸ñÊ½ĞÅÏ¢
+	// æ˜¾ç¤ºæ ¼å¼ä¿¡æ¯
 	ShowFormatInfo(format_context);
 
-	// ²éÕÒÒôÆµÁ÷Ë÷Òı
+	// æŸ¥æ‰¾éŸ³é¢‘æµç´¢å¼•
 	int audio_stream_index = -1;
 	for (int index = 0; index < format_context->nb_streams; ++index)
 	{
@@ -151,12 +151,12 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//av_dump_format(format_context, 0, T2A(audio_path), 0);
 
-	// µÃµ½ÒôÆµÁ÷£¬ÒÔ¼°±àÂëÆ÷ÉÏÏÂÎÄ
+	// å¾—åˆ°éŸ³é¢‘æµï¼Œä»¥åŠç¼–ç å™¨ä¸Šä¸‹æ–‡
 	AVStream *audio_stream = format_context->streams[audio_stream_index];
 	AVCodecContext *audio_codec_context = audio_stream->codec;
 
 
-	// ¸ù¾İ½âÂëÆ÷ID²éÕÒ½âÂëÆ÷£¬²¢´ò¿ª
+	// æ ¹æ®è§£ç å™¨IDæŸ¥æ‰¾è§£ç å™¨ï¼Œå¹¶æ‰“å¼€
 	AVCodec *audio_codec = avcodec_find_decoder(audio_stream->codec->codec_id);
 	if (audio_codec == NULL)
 	{
@@ -171,9 +171,9 @@ int _tmain(int argc, _TCHAR* argv[])
 		return -5;
 	}
 
-	// ×¼±¸½âÂëÖ®Ç°£¬ÏÈÉè¶¨ºÃPCM×ª²ÎÊı
+	// å‡†å¤‡è§£ç ä¹‹å‰ï¼Œå…ˆè®¾å®šå¥½PCMè½¬å‚æ•°
 	uint64_t output_channel_layout = AV_CH_LAYOUT_STEREO;
-	int output_frame_size = audio_codec_context->frame_size;	// AACÊÇ1024£»MP3ÊÇ1152£»
+	int output_frame_size = audio_codec_context->frame_size;	// AACæ˜¯1024ï¼›MP3æ˜¯1152ï¼›
 	AVSampleFormat output_sample_format = AV_SAMPLE_FMT_S16;
 	int output_sample_rate = audio_codec_context->sample_rate;	// 44100
 	int output_channels = av_get_channel_layout_nb_channels(output_channel_layout);
@@ -190,7 +190,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		input_channel_layout, audio_codec_context->sample_fmt, audio_codec_context->sample_rate, 0, NULL);
 	swr_init(audio_convert_context);
 
-	// ¶ÁÈ¡±àÂë°ü£¬Ö´ĞĞ½âÂë
+	// è¯»å–ç¼–ç åŒ…ï¼Œæ‰§è¡Œè§£ç 
 	AVPacket av_packet;
 	AVFrame *av_frame = av_frame_alloc();
 
@@ -199,32 +199,32 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		if (av_packet.stream_index != audio_stream_index)
 		{
-			// ²»ÊÇÒôÆµÊı¾İÁ÷ÖĞµÄ°ü£¬ÎÒÃÇ·Å¹ı
+			// ä¸æ˜¯éŸ³é¢‘æ•°æ®æµä¸­çš„åŒ…ï¼Œæˆ‘ä»¬æ”¾è¿‡
 			continue;
 		}
 
-		// Êä³ö±àÂë°üÏà¹ØĞÅÏ¢
+		// è¾“å‡ºç¼–ç åŒ…ç›¸å…³ä¿¡æ¯
 		ShowPacketInfo(&av_packet);
 
-		// ½âÂëÒôÆµ±àÂë°ü
+		// è§£ç éŸ³é¢‘ç¼–ç åŒ…
 		int got_frame_ptr = 0;
 		errCode = avcodec_decode_audio4(audio_codec_context, av_frame, &got_frame_ptr, &av_packet);
 
 		if (!got_frame_ptr)
 			continue;
 
-		// ½âÂëÍê³É£¬ÕâÀï¿ÉÒÔÊä³öÒôÆµÊı¾İÁË
+		// è§£ç å®Œæˆï¼Œè¿™é‡Œå¯ä»¥è¾“å‡ºéŸ³é¢‘æ•°æ®äº†
 		if (!is_print_info)
 		{
 			is_print_info = true;
 
-			// ÏÔÊ¾½âÂëÉÏÏÂÎÄ
+			// æ˜¾ç¤ºè§£ç ä¸Šä¸‹æ–‡
 			ShowCodecContextInfo(audio_codec_context);
 		}
 
 		ShowFrameInfo(av_frame);
 
-		// Ö´ĞĞ×ª»»
+		// æ‰§è¡Œè½¬æ¢
 		swr_convert(audio_convert_context, &output_buffer, MAX_AUDIO_FRAME_SIZE, (const unsigned char **)av_frame->data, av_frame->nb_samples);
 
 		fwrite(output_buffer, 1, output_buffer_size, audio_output_file);
